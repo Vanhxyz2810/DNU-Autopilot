@@ -1,0 +1,30 @@
+# ─── Secrets (KHÔNG BAO GIỜ commit) ───
+.env
+*.env
+captures/
+saved_logins.json
+creds.json
+
+# ─── Python ───
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# ─── Node / Frontend ───
+node_modules/
+webapp/frontend/dist/
+webapp/frontend/.vite/
+
+# ─── Logs & tạm ───
+*.log
+tmp/
+temp/
+
+# ─── OS / IDE ───
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
