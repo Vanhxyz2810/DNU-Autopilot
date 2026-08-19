@@ -1,5 +1,8 @@
 // api.js — Lớp giao tiếp backend (trừu tượng hoá, dễ swap base URL).
-const BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+// Mặc định "" = path tương đối -> gọi API ngay trên chính origin đang mở
+// (khi backend serve luôn frontend build → cùng domain, không dính CORS).
+// Dev tách 2 server: đặt VITE_API_BASE=http://localhost:8000 trong .env.local.
+const BASE = import.meta.env.VITE_API_BASE ?? "";
 
 async function post(path, body) {
   const res = await fetch(`${BASE}${path}`, {

@@ -20,7 +20,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -354,3 +355,22 @@ async def exam_result(body: ExamResultBody) -> dict:
 @app.get("/api/health")
 async def health() -> dict:
     return {"status": "ok"}
+
+
+# ───────────── Serve frontend build (SPA) ─────────────────────────
+# Gộp FE + BE vào 1 origin -> chỉ cần 1 Cloudflare Tunnel, không dính CORS.
+# Đặt ở CUỐI FILE để các route /api/* được ưu tiên khớp trước.
+_DIST = _ROOT / "webapp" / "frontend" / "dist"
+if _DIST.is_dir():
+    # assets/ (JS, CSS có hash) -> serve trực tiếp.
+    app.mount("/assets", StaticFiles(directory=str(_DIST / "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def spa_fallback(full_path: str):  # noqa: ANN201
+        """Trả file tĩnh nếu tồn tại, ngược lại trả index.html (SPA routing)."""
+        candidate = _DIST / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(str(candidate))
+        return FileResponse(str(_DIST / "index.html"))
+else:
+    logger.warning("Chưa có frontend/dist. Chạy 'npm run build' để serve web từ backend.")
